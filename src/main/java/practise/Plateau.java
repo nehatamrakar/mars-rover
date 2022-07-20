@@ -1,11 +1,11 @@
 package practise;
 
 public class Plateau {
-    private int topRightOfPlateau;
-    private int bottomRightOfPlateau;
+    public int topEndOfPlateau;
+    public int bottomEndOfPlateau;
 
     public Plateau(int topRightOfPlateau, int bottomRightOfPlateau) {
-        this.topRightOfPlateau = topRightOfPlateau;
-        this.bottomRightOfPlateau = bottomRightOfPlateau;
+        this.topEndOfPlateau = topRightOfPlateau;
+        this.bottomEndOfPlateau = bottomRightOfPlateau;
     }
 }
