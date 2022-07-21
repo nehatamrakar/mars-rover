@@ -3,9 +3,9 @@ package practise;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 public class Rover {
-    private int xCoordinateOfRover;
-    private int yCoordinateOfRover;
-    private char directionOfRover;
+    private final int xCoordinateOfRover;
+    private final int yCoordinateOfRover;
+    private final char directionOfRover;
 
     public Rover(int xCoordinateOfRover, int yCoordinateOfRover,char directionOfRover) {
         this.xCoordinateOfRover = xCoordinateOfRover;
@@ -15,18 +15,14 @@ public class Rover {
 
     public String nextPosition(String instructions, Plateau plateau) {
             CharacterIterator it = new StringCharacterIterator(instructions);
+
             int currentXCoordinate = xCoordinateOfRover;
             int currentYCoordinate = yCoordinateOfRover;
             char currentDirection = directionOfRover;
+
             while (it.current() != CharacterIterator.DONE) {
                 char nextDirection = it.current();
-//                if(currentXCoordinate==plateau.topEndOfPlateau && currentDirection=='E' && nextDirection=='M')
-//                    continue;
-//                if(currentXCoordinate==0 && currentDirection=='W' && nextDirection=='M')
-//                    continue;
-//                if(currentYCoordinate==plateau.bottomEndOfPlateau && currentDirection=='N' && nextDirection=='M')
-//                    continue;
-//                if()
+
                 if(currentDirection=='N'){
                     if(nextDirection=='M' && currentXCoordinate<plateau.topEndOfPlateau){
                         currentYCoordinate++;
