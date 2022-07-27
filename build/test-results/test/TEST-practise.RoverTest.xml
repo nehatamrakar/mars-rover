@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="practise.RoverTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-07-21T18:52:44" hostname="NT-IT-LT-2169" time="0.014">
+<testsuite name="practise.RoverTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2022-07-27T14:19:41" hostname="NT-IT-LT-2169" time="0.019">
   <properties/>
-  <testcase name="expect_Rovers_End_Position_Sameas_Start_Position()" classname="practise.RoverTest" time="0.014"/>
+  <testcase name="RoversMoveToEndPosition()" classname="practise.RoverTest" time="0.018"/>
+  <testcase name="RoversEndPosition_SameAs_StartPosition()" classname="practise.RoverTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

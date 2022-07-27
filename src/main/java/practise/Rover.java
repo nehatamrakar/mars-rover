@@ -1,75 +1,76 @@
 package practise;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
-public class Rover {
-    private final int xCoordinateOfRover;
-    private final int yCoordinateOfRover;
-    private final char directionOfRover;
+import practise.exception.RoverOutsidePlateauException;
 
-    public Rover(int xCoordinateOfRover, int yCoordinateOfRover,char directionOfRover) {
-        this.xCoordinateOfRover = xCoordinateOfRover;
-        this.yCoordinateOfRover = yCoordinateOfRover;
-        this.directionOfRover = directionOfRover;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Rover {
+    private int xCoordinate;
+    private int yCoordinate;
+    private Direction direction;
+
+    private Plateau plateau;
+
+    private static Map<Coordinate, Boolean> allRoverCoordinates = new HashMap<>();
+
+    public Rover(int topX, int topY, int xCoordinate, int yCoordinate, Direction direction) throws RoverOutsidePlateauException {
+        if (xCoordinate < 0 || xCoordinate > topX || yCoordinate < 0 || yCoordinate > topY) {
+            RoverOutsidePlateauException ex = new RoverOutsidePlateauException("Rover outside plateau");
+            throw ex;
+        }
+        this.plateau = new Plateau(topX, topY);
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
+        this.direction = direction;
     }
 
-    public String nextPosition(String instructions, Plateau plateau) {
-            CharacterIterator it = new StringCharacterIterator(instructions);
+    public Rover(int xCoordinate, int yCoordinate, Direction direction, Plateau plateau) {
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
+        this.direction = direction;
+        this.plateau = plateau;
+        allRoverCoordinates.put(new Coordinate(xCoordinate, yCoordinate), Boolean.TRUE);
+    }
 
-            int currentXCoordinate = xCoordinateOfRover;
-            int currentYCoordinate = yCoordinateOfRover;
-            char currentDirection = directionOfRover;
+    public void action(Instruction instruction) {
+        int potentialXCoordinate = instruction.moveXCoordinate(xCoordinate, yCoordinate, facing(), plateau, instruction);
+        int potentialYCoordinate = instruction.moveYCoordinate(xCoordinate, yCoordinate, facing(), plateau, instruction);
+        if(allRoverCoordinates.containsKey(new Coordinate(potentialXCoordinate, potentialYCoordinate))) return;
+        allRoverCoordinates.remove(new Coordinate(xCoordinate, yCoordinate));
+        xCoordinate = potentialXCoordinate;
+        yCoordinate = potentialYCoordinate;
+        direction = instruction.turn(facing(), instruction);
+        allRoverCoordinates.put(new Coordinate(xCoordinate, yCoordinate), Boolean.TRUE);
+    }
 
-            while (it.current() != CharacterIterator.DONE) {
-                char nextDirection = it.current();
-
-                if(currentDirection=='N'){
-                    if(nextDirection=='M' && currentXCoordinate<plateau.topEndOfPlateau){
-                        currentYCoordinate++;
-                    }
-                    if(nextDirection=='L'){
-                        currentDirection='W';
-                    }
-                    if(nextDirection=='R'){
-                        currentDirection='E';
-                    }
-                }
-                else if(currentDirection=='S'){
-                    if(nextDirection=='M' && currentYCoordinate>0){
-                        currentYCoordinate--;
-                    }
-                    if(nextDirection=='L'){
-                        currentDirection='E';
-                    }
-                    if(nextDirection=='R'){
-                        currentDirection='W';
-                    }
-                }
-                else if(currentDirection=='E'){
-                    if(nextDirection=='M' && currentXCoordinate< plateau.bottomEndOfPlateau){
-                        currentXCoordinate++;
-                    }
-                    if(nextDirection=='L'){
-                        currentDirection='N';
-                    }
-                    if(nextDirection=='R'){
-                        currentDirection='S';
-                    }
-                }
-                else if(currentDirection=='W'){
-                    if(nextDirection=='M' && currentXCoordinate>0){
-                        currentXCoordinate--;
-                    }
-                    if(nextDirection=='L'){
-                        currentDirection='S';
-                    }
-                    if(nextDirection=='R'){
-                        currentDirection='N';
-                    }
-                }
-                it.next();
-            }
-            String end_coordinate = currentXCoordinate+" "+currentYCoordinate+" "+currentDirection;
-            return end_coordinate;
+    public void action(List<Instruction> instructionList) {
+        for(Instruction instruction : instructionList) {
+            xCoordinate = instruction.moveXCoordinate(xCoordinate, yCoordinate, facing(), plateau, instruction);
+            yCoordinate = instruction.moveYCoordinate(yCoordinate, yCoordinate, facing(), plateau, instruction);
+            direction = instruction.turn(facing(), instruction);
         }
+    }
+
+    public void action(String input) {
+        for(int charIndex = 0; charIndex < input.length(); charIndex++) {
+            if(input.charAt(charIndex) == '^') action(Instruction.M);
+            if(input.charAt(charIndex) == '<') action(Instruction.L);
+            if(input.charAt(charIndex) == '>') action(Instruction.R);
+        }
+    }
+
+    public int xPosition() {
+        return this.xCoordinate;
+    }
+
+    public int yPosition() {
+        return this.yCoordinate;
+    }
+
+    public Direction facing() {
+        return this.direction;
+    }
 }
+
