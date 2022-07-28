@@ -1,54 +1,114 @@
 package practise;
+
+import com.tw.bootcamp.marsRover.exception.RoverOutsidePlateauException;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 public class RoverTest {
 
     @Test
-    public void RoversEndPosition_SameAs_StartPosition(){
-        Plateau plateau_end_coordinates = new Plateau(5,5) ;
-        Rover start_coordinates_for_first_rover = new Rover(1,2,'N');
-        String instructions_for_first_rover = "";
-        Rover start_coordinates_for_second_rover = new Rover(3,3,'E');
-        String instructions_for_second_rover = "";
-        String expected_endpoints = "1 2 N 3 3 E";
-        String end_coordinates_for_first_rover = start_coordinates_for_first_rover.action(instructions_for_first_rover,plateau_end_coordinates);
-        String end_coordinates_for_second_rover = start_coordinates_for_second_rover.action(instructions_for_second_rover,plateau_end_coordinates);
-
-        String endCoordinatesAndDirection_OfBothRovers = end_coordinates_for_first_rover + " " + end_coordinates_for_second_rover;
-
-        assertEquals(expected_endpoints, endCoordinatesAndDirection_OfBothRovers);
+    void moveRoverTest() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(10, 10, 0, 0, Direction.N);
+        rover.action(Instruction.M);
+        Rover expectedRover = new Rover(10, 10, 0, 1, Direction.N);
+        assertEquals(rover.xPosition(), expectedRover.xPosition());
+        assertEquals(rover.yPosition(), expectedRover.yPosition());
+        assertEquals(rover.facing(), expectedRover.facing());
     }
 
-//    @Test
-//    public void RoversTurnLeft(){
-//
-//    }
-//
-//    @Test
-//    public void RoversTurnRight(){
-//
-//    }
-//
-//    @Test
-//    public void RoversMove_InTheSameDirection(){
-//
-//    }
+    @Test
+    void roverOutsidePlateauTest() {
+        assertThrows(RoverOutsidePlateauException.class, () -> new Rover(2, 2, 3, 3, Direction.N));
+    }
 
     @Test
-    public void RoversMoveToEndPosition(){
-        Plateau plateau_end_coordinates = new Plateau(5,5) ;
-        Rover start_coordinates_for_first_rover = new Rover(1,2,Direction.N);
-        String instructions_for_first_rover = "LMLMLMLMM";
+    void rotateRoverToLeft() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(10, 10, 0, 0, Direction.N);
+        rover.action(Instruction.L);
+        Rover expectedRover = new Rover(10, 10, 0, 0, Direction.W);
+        assertEquals(rover.facing(), expectedRover.facing());
+    }
 
-        Rover start_coordinates_for_second_rover = new Rover(3,3,Direction.E);
-        String instructions_for_second_rover = "MMRMMRMRRM";
-        String expected_endpoints = "1 3 N 5 1 E";
+    @Test
+    void rotateRoverToRight() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(10, 10, 0, 0, Direction.N);
+        rover.action(Instruction.R);
+        Rover expectedRover = new Rover(10, 10, 0, 0, Direction.E);
+        assertEquals(rover.facing(), expectedRover.facing());
+    }
 
-        String end_coordinates_for_first_rover = start_coordinates_for_first_rover.action(instructions_for_first_rover,plateau_end_coordinates);
-        String end_coordinates_for_second_rover = start_coordinates_for_second_rover.action(instructions_for_second_rover,plateau_end_coordinates);
+    @Test
+    void moveRoverWithMultipleInputs() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(5, 5, 1, 2, Direction.N);
 
-        String endCoordinatesAndDirection_OfBothRovers = end_coordinates_for_first_rover + " " + end_coordinates_for_second_rover;
+        List<Instruction> instructionList = List.of(Instruction.L, Instruction.M, Instruction.L, Instruction.M,
+                Instruction.L, Instruction.M, Instruction.L, Instruction.M, Instruction.M);
 
-        assertEquals(expected_endpoints, endCoordinatesAndDirection_OfBothRovers);
+        rover.action(instructionList);
+        Rover expectedRover = new Rover(5, 5, 1, 3, Direction.N);
+        assertEquals(rover.xPosition(), expectedRover.xPosition());
+        assertEquals(rover.yPosition(), expectedRover.yPosition());
+        assertEquals(rover.facing(), expectedRover.facing());
+    }
+
+    @Test
+    void expectExtraInstructionsToMoveRoverOutsidePlateauDoNothing() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(2, 2, 0, 0, Direction.N);
+        List<Instruction> instructionList = List.of(Instruction.M, Instruction.M);
+        rover.action(instructionList);
+        Rover expectedRover = new Rover(2, 2, 0, 1, Direction.N);
+        assertEquals(rover.xPosition(), expectedRover.xPosition());
+        assertEquals(rover.yPosition(), expectedRover.yPosition());
+        assertEquals(rover.facing(), expectedRover.facing());
+    }
+
+    @Test
+    void expectPlateauToGetExtraRoversInsideIt() {
+        Plateau plateau = new Plateau(2, 2);
+        List<Rover> rovers = List.of(new Rover(0, 0, Direction.N, plateau),
+                new Rover(1, 0, Direction.N, plateau));
+        assertDoesNotThrow(()-> plateau.addRovers(rovers));
+    }
+
+    @Test
+    void expectMultipleRoversOnPlateauAreFunctioningCorrectly() {
+        Plateau plateau = new Plateau(2, 2);
+        List<Rover> rovers = List.of(new Rover(0, 0, Direction.N, plateau),
+                new Rover(1, 0, Direction.N, plateau));
+        List<List<Instruction>> instructionsList = List.of(List.of(Instruction.M, Instruction.M, Instruction.M, Instruction.R),
+                List.of(Instruction.M, Instruction.R, Instruction.M, Instruction.M));
+        plateau.addRovers(rovers);
+        plateau.action(rovers, instructionsList);
+        Rover expectedRover_1 = new Rover(0, 1, Direction.E, plateau);
+        Rover expectedRover_2 = new Rover(1, 1, Direction.E, plateau);
+        assertEquals(rovers.get(0).xPosition(), expectedRover_1.xPosition());
+        assertEquals(rovers.get(0).yPosition(), expectedRover_1.yPosition());
+        assertEquals(rovers.get(0).facing(), expectedRover_1.facing());
+        assertEquals(rovers.get(1).xPosition(), expectedRover_2.xPosition());
+        assertEquals(rovers.get(1).yPosition(), expectedRover_2.yPosition());
+        assertEquals(rovers.get(1).facing(), expectedRover_2.facing());
+    }
+
+    @Test
+    void expectRoverToTakeSpecialCharacterInputs() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(2, 2, 0, 0, Direction.N);
+        rover.action("^");
+        Rover expectedRover = new Rover(2, 2, 0, 1, Direction.N);
+        assertEquals(rover.xPosition(), expectedRover.xPosition());
+        assertEquals(rover.yPosition(), expectedRover.yPosition());
+        assertEquals(rover.facing(), expectedRover.facing());
+    }
+
+    @Test
+    void expectRoverToTakeMultipleSpecialCharacterInputs() throws RoverOutsidePlateauException {
+        Rover rover = new Rover(2, 2, 0, 0, Direction.N);
+        rover.action(">^^<^^^<^<^<<");
+        Rover expectedRover = new Rover(2, 2, 0, 0, Direction.N);
+        assertEquals(rover.xPosition(), expectedRover.xPosition());
+        assertEquals(rover.yPosition(), expectedRover.yPosition());
+        assertEquals(rover.facing(), expectedRover.facing());
     }
 }
